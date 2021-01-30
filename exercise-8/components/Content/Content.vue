@@ -1,11 +1,11 @@
 <template>
   <section class="content">
-    <section class="header-banner relative py-12 px-0">
-        <div class="wrapper relative m-auto text-center z-10">
-          <h5 class="lato font-hairline thick-header-line uppercase tracking-wider mt-0 text-white inline-block relative">
-            Systems Development <span class="decorative-span relative my-0 mx-3 leading-10 inline-block">and</span> Frameworks
+    <section class="header-banner relative  py-56 bg-gray-900 h-64 px-0">
+        <div class="wrapper max-w-4xl relative m-auto px-8 text-center z-10">
+          <h5 class="lato leading-4 font-hairline px-8 thick-header-line uppercase tracking-wider mt-0 text-white inline-block relative">
+            Systems Development <span class="decorative-span text-red-500 relative my-0 mx-3 leading-10 inline-block">and</span> Frameworks
           </h5>
-          <p style="color:#e6cf1a" class="text-6xl mb-2 montserrat font-bold uppercase">
+          <p class="text-6xl text text-yellow-400 mb-2 montserrat font-bold uppercase">
             THE COUNTRY<br> ROADS
           </p>
         </div>
@@ -39,7 +39,6 @@ export default {
 <style lang="scss">
 .decorative-span{
   vertical-align: middle;
-  color: #FF4056;
   &:before, &:after {
     background-color: #fff;
     bottom: 100%;
@@ -78,21 +77,12 @@ export default {
   font-family: 'Lato'
 }
 
-.header-banner {
-  height: 600px;
-  background-color: #2A2C39;
-}
-
 .montserrat{
   font-family: 'Montserrat';
 }
 
 .wrapper{
-	max-width: 53.33rem;
 	transform: translateY(-50%);
 	top:50%;
-  h5 {
-    line-height: 1;
-  }
 }
 </style>
