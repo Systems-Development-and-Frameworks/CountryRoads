@@ -1,17 +1,17 @@
 <template>
   <section class="content">
     <section class="header-banner relative  py-56 bg-gray-900 h-64 px-0">
-        <div class="wrapper max-w-4xl relative m-auto px-8 text-center z-10">
+        <div class="wrapper container max-w-4xl relative m-auto px-8 text-center z-10">
           <h5 class="lato leading-4 font-hairline px-8 thick-header-line uppercase tracking-wider mt-0 text-white inline-block relative">
             Systems Development <span class="decorative-span text-red-500 relative my-0 mx-3 leading-10 inline-block">and</span> Frameworks
           </h5>
-          <p class="text-6xl text text-yellow-400 mb-2 montserrat font-bold uppercase">
+          <p class="sm:text-6xl text-5xl text text-yellow-400 my-4 montserrat font-bold uppercase">
             THE COUNTRY<br> ROADS
           </p>
         </div>
 	  </section>
-    <figure>
-        <div class="grid grid-cols-3">
+    <figure class="container m-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-3">
             <Item v-for="(item, index) in items" :key="index" :item="item" />
         </div>
     </figure>
@@ -53,6 +53,12 @@ export default {
   }
 }
 
+@mixin rwd($screen) {
+   @media (max-width: $screen+'px') {
+       @content;
+   }
+}
+
 .thick-header-line {
   &:before, 
   &:after {
@@ -64,12 +70,21 @@ export default {
     background-color: #fff;
     top:50%;
     margin-bottom: -4px;
+    @include rwd(768) {
+      width:3rem;
+    }
   }
   &:before{
 	  left: -7.5rem;
+    @include rwd(768) {
+      left: -2rem;
+    }
   }
   &:after{
 	  right: -7.5rem;
+     @include rwd(768) {
+      right: -2rem;
+    }
   }
 }
 
