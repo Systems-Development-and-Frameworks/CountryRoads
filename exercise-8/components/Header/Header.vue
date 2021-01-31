@@ -5,59 +5,69 @@
         <a href="/" class="py-3 px-5 border-8 border-teal-600">
           LOGO
         </a>
-        <button v-on:click="toggleNavbar" id="hamburgerbtn" class="block lg:hidden">MENU</button>
-        <input type="checkbox" id="hamburgerCbx" class="hidden"/>
+        <button v-if="!show" @click="show = !show" class="block lg:hidden" id="menu-btn">MENU</button>
       </div>
-      <ul class="hidden lg:block lg:flex lg:flex-row align-middle text-lg" id="mobileMenu">
-        <li class="pr-5 py-3 px-5 border-8 border-transparent"><a href="#">Services</a></li>
-        <li class="pr-5 py-3 px-5 border-8 border-transparent"><a href="#">Porfolio</a></li>
-        <li class="pr-5 py-3 px-5 border-8 border-transparent"><a href="#">About</a></li>
-        <li class="py-3 px-5 border-8 border-transparent"><a href="#">Contact</a></li>
+      <ul class="hidden lg:flex lg:flex-row align-middle text-lg">
+        <li v-for="(item, index) in menu" :key="index" class="pr-5 py-3 px-5 border-8 border-transparent"><a :href="item.link">{{item.text}}</a></li>
       </ul>
+      <transition name="slide-fade">
+        <div v-if="show" class="hamburger-menu-list block lg:hidden align-middle text-lg fixed top-0 right-0 z-50 h-screen p-12 m-0 text-center" >
+          <button @click="show = !show" class="outline-none text-white py-2 px-5 border-4" id="hamburger-btn" >X</button>
+          <ul>
+            <li v-for="(item, index) in menu" :key="index" class="pr-5 py-3 px-5 border-8 border-transparent"><a :href="item.link">{{item.text}}</a></li>
+          </ul>
+        </div>
+      </transition>
     </nav>
   </header>
 </template>
 <script>
 export default {
-  methods: {
-    toggleNavbar: function() {
-      const checkBox = document.getElementById("hamburgerCbx");
-      checkBox.checked = !checkBox.checked
-      if(checkBox.checked) {
-        document.getElementById("mobileMenu").classList.add("show");
-        document.getElementById("mobileMenu").classList.add("active");
-      } else {
-        document.getElementById("mobileMenu").classList.remove("active");
-      }
+  data() {
+    const link = '#'
+    return {
+      show: false,
+      menu: [
+          {text:'Services', link},
+          {text:'Porfolio', link},
+          {text:'About', link},
+          {text:'Contact', link},
+      ]
     }
   }
 }
 </script>
+<style lang="scss">
+#menu-btn:focus{
+  outline: none;
+  display: none;
+}
 
-<style>
-  #mobileMenu.show {
-    position: fixed;
-    top: 210px;
-    right: 0;
-    z-index: 9999;
-    background: #9fc1c3;
-    height: 100%;
-    display: block;
-    border-left: 15px solid #319795;
-    width: 300px;
-    margin: -100px 0 0 0;
-    padding: 50px;
-    padding-top: 125px;
-    right: -100px;
-    -webkit-font-smoothing: antialiased;
-    transform-origin: 0% 0%;
-    transform: translate(100%, 0);
-    transition: transform 0.5s cubic-bezier(0.77,0.2,0.05,1.0);
+#hamburger-btn {
+  border: solid 3px #fff;
+  &:focus{
+    outline: none;
   }
+}
 
-  #mobileMenu.show.active {
-    transform: none;
-    opacity: 1;
-  }
+.hamburger-menu-list {
+  border-left: 15px solid #319795;
+  width: 51vh;
+  min-width: 150px;
+  -webkit-font-smoothing: antialiased;
+  background: #9fc1c3;
+}
 
+.slide-fade-enter-active {
+  transition: all .5s ease;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.5s cubic-bezier(0.77,0.2,0.05,1.0);
+}
+
+.slide-fade-enter, .slide-fade-leave-to {
+  transform: translateX(500px);
+  opacity: 0;
+}
 </style>

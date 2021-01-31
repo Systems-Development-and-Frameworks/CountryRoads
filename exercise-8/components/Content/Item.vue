@@ -6,7 +6,7 @@
         <div class="col-span-3 px-10 lg:px-5">
             <h3 class="text-3xl text-left lg:text-center text-gray-900 mb-0 lg:m-b4 font-bold capitalize">{{item.name}}</h3>
             <p class="capitalize text-justify">{{item.description}}</p>
-            <button class="p-2.5 px-6 bg-gray-900 text-yellow-400 mt-6 text-black rounded shadow-md">
+            <button class="py-2 px-6 bg-gray-900 text-yellow-400 mt-6 text-black rounded shadow-md">
                 <a :href="item.link" target="_blank">MORE</a>
             </button>
         </div>
