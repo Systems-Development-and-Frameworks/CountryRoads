@@ -108,7 +108,7 @@ export default {
           votes: response.data.downvote.votes,
         })
       } catch {
-        throw new Error("Mutation 'vote' failed!")
+        throw new Error("Mutation 'downvote' failed!")
       }
     },
   },
