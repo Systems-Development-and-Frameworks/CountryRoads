@@ -44,7 +44,7 @@ jobs:
         working-directory: ./backend/
     steps:
       - uses: actions/checkout@v2
-      - name: Linting backend 
+      - name: Linting backend
         run: |
               yarn install
               yarn lint
@@ -57,10 +57,10 @@ jobs:
     defaults:
       run:
        working-directory: ./backend/
-    
+
     steps:
       - uses: actions/checkout@v2
-      - name: Testing backend 
+      - name: Testing backend
         run: |
               yarn install
               yarn test
