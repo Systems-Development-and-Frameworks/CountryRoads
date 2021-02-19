@@ -4,7 +4,8 @@ const bcrypt = require('bcrypt');
 
 const NEW_VOTE = 0
 const VOTE_AGAIN = 1
-const NOT_ALLOWED_VOTE = -1
+const NOT_ALLOWED_UPVOTE = -1
+const NOT_ALLOWED_DOWNVOTE = -2
 
 const login = async(args, executor, context) => {
   const document  = gql`
@@ -18,7 +19,7 @@ const login = async(args, executor, context) => {
 
   const { email, password } = args;
   const { data, errors } = await executor({ document, variables: {} });
-
+  
   if (errors) {
     throw new UserInputError(errors.map((e) => e.message).join('\n'));
   }
@@ -71,13 +72,13 @@ const checkUserExist = async (userId, executor) => {
       id
     }
   }`;
-
-
+  
+  
   let response = await executor({ document, variables: {id: userId } });
   if (response.errors) {
     throw new UserInputError(response.errors.map((e) => e.message).join('\n'));
   }
-
+  
   return !!response.data.person;
 }
 
@@ -93,12 +94,12 @@ const checkPostExist = async (postId, executor) => {
   if (response.errors) {
     throw new UserInputError(response.errors.map((e) => e.message).join('\n'));
   }
-
+  
   return !!response.data.post;
 }
 
 const checkEmailExist = async (email, executor) => {
-
+  
   let document  = gql`
   query {
     people{
@@ -119,10 +120,10 @@ const checkEmailExist = async (email, executor) => {
 }
 
 /**
- * @param val is either -1 or 1.if -1 is downvote, otherwise upvote
+ * @param val is either -1 or 1.if -1 is downvote, otherwise upvote 
  */
 const mayVote = async(userId, postId, val, executor) => {
-
+  
   //get the list voters of User
   const document  = gql`
   query ($userId: ID!, $postId: ID!) {
@@ -133,11 +134,11 @@ const mayVote = async(userId, postId, val, executor) => {
   }`;
 
   const { data, errors } = await executor({ document, variables: { userId: userId, postId: postId} });
-
+  
   if (errors) {
     throw new UserInputError(errors);
   }
-
+  
   const { voters } = data;
   let voteType = NEW_VOTE
   let voterId = null
@@ -145,7 +146,7 @@ const mayVote = async(userId, postId, val, executor) => {
   if(voters) {
     if(voters.length > 0) { // User already has voted (max length = 1)
       if(voters[0].value === val) {
-        voteType = NOT_ALLOWED_VOTE;
+        voteType = val === -1 ? NOT_ALLOWED_DOWNVOTE : NOT_ALLOWED_UPVOTE;
       } else {
         voteType = VOTE_AGAIN; //user is allowed vote again.
         voterId = voters[0].id
@@ -165,7 +166,7 @@ const downvotePost = async(userId, postId, schema, executor, context, info) => {
 }
 
 const votePost = async(userId, postId, val, schema, executor, context, info) => {
-
+  
   if(!await checkUserExist(userId, executor)) { //user is not exist?
     throw new AuthenticationError("Sorry, your credentials are wrong!");
   }
@@ -175,17 +176,21 @@ const votePost = async(userId, postId, val, schema, executor, context, info) => 
   }
 
   const { voteType, voterId } = await mayVote(userId, postId, val, executor)
-
-  if(voteType === NOT_ALLOWED_VOTE) {
-    throw new UserInputError("This user voted on that post already.");
+  
+  if(voteType === NOT_ALLOWED_UPVOTE) {
+    throw new UserInputError("This user upvoted on that post already.");
   }
 
+  if(voteType === NOT_ALLOWED_DOWNVOTE) {
+    throw new UserInputError("This user downvoted on that post already.");
+  }
+  
   let variables = {}
   let document = null
 
   if(voteType === VOTE_AGAIN && voterId) {
 
-    variables = {
+    variables = { 
       data:{
         value: val
       },
@@ -201,9 +206,9 @@ const votePost = async(userId, postId, val, schema, executor, context, info) => 
         }
       }
     `;
-
+    
   } else { //NEW_VOTE
-    variables = {
+    variables = { 
       data:{
         person:{
           connect: {id:userId}
@@ -214,7 +219,7 @@ const votePost = async(userId, postId, val, schema, executor, context, info) => 
         value: val
       }
     }
-
+    
     document = gql`
       mutation ($data: VoterCreateInput!) {
         createVoter(data: $data) {
@@ -224,11 +229,11 @@ const votePost = async(userId, postId, val, schema, executor, context, info) => 
     `;
   }
   const { data, errors }  = await executor({ document, variables });
-
+  
   if (errors) throw new UserInputError(errors.map((e) => e.message).join('\n'));
-
+  
   if (data.createVoter || data.updateVoter) {
-
+  
     const votedPost = await delegateToSchema({
       schema,
       operation: 'query',
@@ -239,39 +244,11 @@ const votePost = async(userId, postId, val, schema, executor, context, info) => 
       context,
       info
     });
-
+  
     return votedPost;
   }
-
+  
   return null;
-}
-
-const checkForExistingPost= async(userId, postId,value, executor ) => { // eslint-disable-line no-unused-vars
-
-  const param = {
-    data:{
-      person:{
-        connect: {id:userId}
-      },
-      post:{
-        connect:{id:postId}
-      },
-      value
-    }
-  }
-
-  let document = gql`
-  mutation ($data: VoterCreateInput!) {
-    createVoter(data: $data) {
-      id
-    }
-  }
-  `;
-   const { data, errors } = await executor({ document, variables : {data: param.data} });
-if (errors) throw new UserInputError(errors.map((e) => e.message).join('\n'));
-const { createVoter } = data;
-return createVoter != null && createVoter.length == 0;
-
 }
 
 const writePost = async(userId, args, schema, executor, context, info) => {
@@ -283,10 +260,10 @@ const writePost = async(userId, args, schema, executor, context, info) => {
   const {post} = args
 
   //create Voter
-  const param = {
+  const param = { 
     data: {
       title: post.title,
-      author: {
+      author: { 
         connect : { id : userId}
       }
     }
@@ -305,7 +282,7 @@ const writePost = async(userId, args, schema, executor, context, info) => {
 }
 
 const mayDelete = async(userId, postId, executor) => {
-
+  
   //get the Post with user id and post id to check author
   const document  = gql`
   query ($userId: ID!, $postId: ID!) {
@@ -315,11 +292,11 @@ const mayDelete = async(userId, postId, executor) => {
   }`;
 
   const { data, errors } = await executor({ document, variables: { userId: userId, postId: postId } });
-
+  
   if (errors) {
     throw new UserInputError(errors);
   }
-
+  
   const { posts } = data;
 
   return posts != null && posts.length > 0; // length == 1
@@ -343,7 +320,7 @@ const deletePost = async(userId, postId, schema, executor, context, info) => {
   }`;
 
   const {errors} = await executor({ document, variables: { userId: userId, postId: postId} });
-
+  
   if (errors) {
     throw new UserInputError(errors.map((e) => e.message).join('\n'));
   }
